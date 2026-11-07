@@ -61,6 +61,10 @@ gives many tied scores.
 - **Synapse attribution:** a pre-side ray longer than 180 nm almost always means a false positive or a cut at the box
   edge. These are flagged and excluded.
 
+## Claude Code
+
+`CLAUDE.md` and `.claude/skills/` brief Claude on this pipeline: rules, coordinates, and how to run each stage.
+
 ## Dependencies (on Misha)
 
 - magneton, not copied here:
