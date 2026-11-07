@@ -1,0 +1,44 @@
+# Tim's graph instance segmentation (yf354 magneton) for the whole of cell B, on our tile-plan affinity.
+# v4 (2026-10-29) = v3 + myelin by morphological opening (r6) instead of the per-voxel 0.4 mask, which merged cells through thin low-affinity membranes.
+# Settings = his config_morgan_neuron_graph_cube30g_v4.yaml (tested on a two-somata region, see ../graph_test).
+# Run through run_cellB_graph.py, which adds: blank-section patch overlay, background outside the tube, gzip output.
+paths:
+  input: "file:///gpfs/radev/.marilyn/pi/kuan/ntl5/cell_A_full/magneton_inference/cellB_neuron_v4_3um_sharded/"
+  fragments: "file:///gpfs/radev/.marilyn/pi/kuan/ntl5/cell_A_full/graph_cellB_v4/fragments/"
+  output: "file:///gpfs/radev/.marilyn/pi/kuan/ntl5/cell_A_full/graph_cellB_v4/seg/"
+mask:
+  flag: false
+  path: ""
+block:
+  core: [256, 1024, 1024]
+  halo: [32, 128, 128]
+  roi: null
+checkpoint:
+  fragments_dir: "/gpfs/radev/project/kuan/ntl5/cell_A_full/cellB_connectivity/graph_cellB/v4/ckpt_fragments"
+  relabel_dir: "/gpfs/radev/project/kuan/ntl5/cell_A_full/cellB_connectivity/graph_cellB/v4/ckpt_relabel"
+fragments_stage:
+  mip: 0
+  supervoxel: "2d"
+  method: "maxima_distance"
+  interior_threshold: 0.9
+  interior_threshold_2d: 0.4     # low affinity = mean of the 3 channels <= 0.4
+  myelin_open_radius: 6          # v4: only low regions that hold a disk of radius 6 px (48 nm) become background (myelin); thin membranes / processes keep their supervoxels (masktest/)
+  min_distance: 3
+  hpc: {enable: false}
+edges_stage:
+  mip: 0
+  merge_function: 'aff50_his256'
+  aff_thresholds: [0.00001, 0.99999]
+  score_threshold: 0.6
+  edges_dir: "/gpfs/radev/project/kuan/ntl5/cell_A_full/cellB_connectivity/graph_cellB/v4/edges"
+  require_all_fragments: false     # only cores that touch the tube are run; the others stay empty (= background)
+  hpc: {enable: false}
+global_merge_stage:
+  threshold: 0.2
+  min_contact: 0
+  dedupe: "max"
+  lut_dir: "/gpfs/radev/project/kuan/ntl5/cell_A_full/cellB_connectivity/graph_cellB/v4/lut"
+relabel_stage:
+  in_place: false
+  segment_properties: false
+  hpc: {enable: false}
